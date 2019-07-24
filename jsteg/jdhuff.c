@@ -12,6 +12,9 @@
 
 #include "jinclude.h"
 
+#ifdef STEG_SUPPORTED
+#include "bitsink.h"
+#endif /* STEG_SUPPORTED */
 
 /* Static variables to avoid passing 'round extra parameters */
 
@@ -364,6 +367,9 @@ huff_decode_mcu (decompress_info_ptr cinfo, JBLOCKROW *MCU_data)
     s += cinfo->last_dc_val[ci];
     cinfo->last_dc_val[ci] = (JCOEF) s;
     /* Descale and output the DC coefficient (assumes ZAG[0] = 0) */
+#ifdef STEG_SUPPORTED
+    exject((JCOEF) s);
+#endif /* STEG_SUPPORTED */
     (*block)[0] = (JCOEF) (((JCOEF) s) * quanttbl[0]);
     
     /* Section F.2.2.2: decode the AC coefficients */
@@ -379,6 +385,9 @@ huff_decode_mcu (decompress_info_ptr cinfo, JBLOCKROW *MCU_data)
 	r = get_bits(s);
 	s = huff_EXTEND(r, s);
 	/* Descale coefficient and output in natural (dezigzagged) order */
+#ifdef STEG_SUPPORTED
+        exject((JCOEF) s);
+#endif /* STEG_SUPPORTED */
 	(*block)[ZAG[k]] = (JCOEF) (((JCOEF) s) * quanttbl[k]);
       } else {
 	if (r != 15)

@@ -19,6 +19,9 @@ djpeg \- decompress a JPEG file to an image file
 .B \-targa
 ]
 [
+.B \-steg " file"
+]
+[
 .B \-blocksmooth
 ]
 [
@@ -103,6 +106,10 @@ gray-scale or if
 is specified; otherwise, colormapped format is emitted if
 .B \-colors
 is specified; otherwise, 24-bit full-color format is emitted.
+.TP
+.B \-steg " file"
+Extract the data file encoded into the JPEG image, and write it to
+the given file.
 .PP
 Switches for advanced users:
 .TP

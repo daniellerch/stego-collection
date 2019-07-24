@@ -55,6 +55,9 @@
 #endif
 #endif
 
+#ifdef STEG_SUPPORTED
+#include "bitsink.h"
+#endif /* STEG_SUPPORTED */
 
 #include "jversion.h"		/* for version message */
 
@@ -214,6 +217,9 @@ usage (void)
 #ifdef TARGA_SUPPORTED
   fprintf(stderr, "  -targa         Select Targa output format\n");
 #endif
+#ifdef STEG_SUPPORTED
+  fprintf(stderr, "  -steg file     Output steganographic text to file\n");
+#endif
   fprintf(stderr, "Switches for advanced users:\n");
 #ifdef BLOCK_SMOOTHING_SUPPORTED
   fprintf(stderr, "  -blocksmooth   Apply cross-block smoothing\n");
@@ -357,6 +363,13 @@ parse_switches (decompress_info_ptr cinfo, int last_file_arg_seen,
     } else if (keymatch(arg, "targa", 1)) {
       /* Targa output format. */
       requested_fmt = FMT_TARGA;
+
+    } else if (keymatch(arg, "steg", 4)) {
+      /* Exject binary file. */
+      if (++argn >= argc)
+        usage();
+      if (!bitsavefile(fopen(argv[argn], WRITE_BINARY)))
+        usage();
 
     } else {
       usage();			/* bogus switch */

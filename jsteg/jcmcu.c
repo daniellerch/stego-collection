@@ -12,6 +12,9 @@
 
 #include "jinclude.h"
 
+#ifdef STEG_SUPPORTED
+#include "bitsource.h"
+#endif /* STEG_SUPPORTED */
 
 /*
  * If this file is compiled with -DDCT_ERR_STATS, it will reverse-DCT each
@@ -103,7 +106,11 @@ extract_block (JSAMPARRAY input_data, int start_row, long start_col,
 	temp += *quanttbl>>1;
 	temp /= *quanttbl;
       }
+#ifdef STEG_SUPPORTED
+      *output_data++ = inject(temp);
+#else  /* not STEG_SUPPORTED */
       *output_data++ = temp;
+#endif /* STEG_SUPPORTED */
       quanttbl++;
     }
   }

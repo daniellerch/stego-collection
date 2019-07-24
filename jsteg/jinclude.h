@@ -93,6 +93,7 @@
 #define MEMCOPY(dest,src,size)	bcopy((const void *)(src), (void *)(dest), (size_t)(size))
 #else /* not BSD, assume Sys V or compatible */
 #include <string.h>
+#include <memory.h>
 #define MEMZERO(target,size)	memset((void *)(target), 0, (size_t)(size))
 #define MEMCOPY(dest,src,size)	memcpy((void *)(dest), (const void *)(src), (size_t)(size))
 #endif /* BSD */

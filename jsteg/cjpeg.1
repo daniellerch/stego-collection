@@ -16,6 +16,9 @@ cjpeg \- compress an image file to a JPEG file
 .B \-targa
 ]
 [
+.B \-steg " file"
+]
+[
 .BI \-maxmemory " N"
 ]
 [
@@ -104,6 +107,13 @@ for such files you must specify
 to make
 .B cjpeg
 treat the input as Targa format.
+.TP
+.B \-steg " file"
+Insert an arbitrary file into the new JPEG image.
+The file contents are inserted in such a way that they are invisible
+to ordinary users, but
+.B djpeg
+can retrieve them.
 .PP
 The
 .B \-quality

@@ -20,7 +20,7 @@ SUFFIX=
 # You may need to adjust these cc options:
 CFLAGS= -v -b -rr -O -j104 $(ARCHFLAGS) -DHAVE_STDC -DINCLUDES_ARE_ANSI \
 	-DAMIGA -DTWO_FILE_COMMANDLINE -DINCOMPLETE_TYPES_BROKEN \
-	-DNO_MKTEMP -DNEED_SIGNAL_CATCHER -DSHORTxSHORT_32
+	-DNO_MKTEMP -DNEED_SIGNAL_CATCHER -DSHORTxSHORT_32 -DSTEG_SUPPORTED
 # -j104 disables warnings for mismatched const qualifiers
 
 # Link-time cc options:
@@ -66,12 +66,12 @@ COMOBJECTS= jutils.o jerror.o jmemmgr.o jmemsys.o
 # compression objectfiles
 CLIBOBJECTS= jcmaster.o jcdeflts.o jcarith.o jccolor.o jcexpand.o jchuff.o \
         jcmcu.o jcpipe.o jcsample.o jfwddct.o jwrjfif.o jrdgif.o jrdppm.o \
-        jrdrle.o jrdtarga.o
+        jrdrle.o jrdtarga.o bitsource.o
 COBJECTS= jcmain.o $(CLIBOBJECTS) $(COMOBJECTS)
 # decompression objectfiles
 DLIBOBJECTS= jdmaster.o jddeflts.o jbsmooth.o jdarith.o jdcolor.o jdhuff.o \
         jdmcu.o jdpipe.o jdsample.o jquant1.o jquant2.o jrevdct.o jrdjfif.o \
-        jwrgif.o jwrppm.o jwrrle.o jwrtarga.o
+        jwrgif.o jwrppm.o jwrrle.o jwrtarga.o bitsink.o
 DOBJECTS= jdmain.o $(DLIBOBJECTS) $(COMOBJECTS)
 # These objectfiles are included in libjpeg.lib
 LIBOBJECTS= $(CLIBOBJECTS) $(DLIBOBJECTS) $(COMOBJECTS)
@@ -127,6 +127,8 @@ test: cjpeg djpeg
 	cmp testimg.jpg testout.jpg
 
 
+bitsink.o : bitsink.c bitsink.h
+bitsource.o : bitsource.c bitsource.h
 jbsmooth.o : jbsmooth.c jinclude.h jconfig.h jpegdata.h 
 jcarith.o : jcarith.c jinclude.h jconfig.h jpegdata.h 
 jccolor.o : jccolor.c jinclude.h jconfig.h jpegdata.h 

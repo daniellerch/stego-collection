@@ -55,6 +55,9 @@
 #endif
 #endif
 
+#ifdef STEG_SUPPORTED
+#include "bitsource.h"
+#endif /* STEG_SUPPORTED */
 
 #include "jversion.h"		/* for version message */
 
@@ -240,6 +243,9 @@ usage (void)
 #ifdef TARGA_SUPPORTED
   fprintf(stderr, "  -targa         Input file is Targa format (usually not needed)\n");
 #endif
+#ifdef STEG_SUPPORTED
+  fprintf(stderr, "  -steg file     Steganography contents of file into image.\n");
+#endif /* STEG_SUPPORTED */
   fprintf(stderr, "Switches for advanced users:\n");
   fprintf(stderr, "  -restart N     Set restart interval in rows, or in blocks with B\n");
 #ifdef INPUT_SMOOTHING_SUPPORTED
@@ -574,7 +580,19 @@ parse_switches (compress_info_ptr cinfo, int last_file_arg_seen,
 	usage();
       cinfo->smoothing_factor = val;
 
-    } else if (keymatch(arg, "targa", 1)) {
+    }
+
+#ifdef STEG_SUPPORTED
+    else if (keymatch(arg, "steg", 4)) {
+      /* Inject binary file. */
+      if (++argn >= argc)
+        usage();
+      if (!bitloadfile(fopen(argv[argn], READ_BINARY)))
+        usage();
+    }
+#endif /* STEG_SUPPORTED */
+
+    else if (keymatch(arg, "targa", 1)) {
       /* Input file is Targa format. */
       is_targa = TRUE;
 
@@ -685,6 +703,12 @@ main (int argc, char **argv)
     fflush(stderr);
   }
 #endif
+
+  if (!bitendload())
+    {
+      fprintf(stderr, "Couldn't load entire file!\n");
+      exit(EXIT_FAILURE);
+    }
 
   /* All done. */
   exit(EXIT_SUCCESS);

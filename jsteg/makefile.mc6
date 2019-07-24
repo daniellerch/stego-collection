@@ -1,13 +1,29 @@
 # Makefile for Independent JPEG Group's software
 
-# This makefile is for use with MMS on VAX/VMS systems.
-# Thanks to Rick Dyson (dyson@iowasp.physics.uiowa.edu)
-# and Tim Bell (tbell@netcom.com) for their help.
+# This makefile is for Microsoft C for MS-DOS, version 6.00A and up.
+# Use NMAKE, not Microsoft's brain-damaged MAKE.
+# Thanks to Alan Wright and Chris Turner of Olivetti Research Ltd.
 
-# Read SETUP instructions before saying "MMS" !!
+# Read SETUP instructions before saying "nmake" !!
 
-CFLAGS= $(CFLAGS) /NoDebug /Optimize /Define = (TWO_FILE_COMMANDLINE,HAVE_STDC,INCLUDES_ARE_ANSI)
-OPT= Sys$Disk:[]MAKVMS.OPT
+# compiler flags. -D gives a #define to the sources:
+#       -AS             small memory model (or use -AM for medium model)
+#       -Ox             maximum safe optimisation
+#       -W3             warning level 3
+#       -Za             ANSI conformance, defines __STDC__ but undefines far
+#                       and near, so we DON'T use it.
+#       -DHAVE_STDC     indicate we do have all the ANSI language features
+#       -DINCLUDES_ARE_ANSI    and all the ANSI include files.
+#       -DMSDOS         we are on an MSDOS machine
+#       -DUSE_FMEM      we have _fmemcpy() and _fmemset()
+#       -DSHORTxLCONST_32      enables compiler-specific multiply optimization
+#       -DMEM_STATS     enable memory usage statistics (optional)
+# You might also want to add -G2 if you have an 80286, etc.
+
+CFLAGS = -AS -Ox -W3 -DHAVE_STDC -DINCLUDES_ARE_ANSI -DSTEG_SUPPORTED -DMSDOS -DUSE_FMEM -DSHORTxLCONST_32
+
+# need linker response file because file list > 128 chars
+RFILE = libjpeg.ans
 
 
 # source files (independently compilable files)
@@ -34,74 +50,78 @@ TESTFILES= testorig.jpg testimg.ppm testimg.gif testimg.jpg
 DISTFILES= $(DOCS) $(MAKEFILES) $(SOURCES) $(SYSDEPFILES) $(INCLUDES) \
         $(OTHERFILES) $(TESTFILES)
 # objectfiles common to cjpeg and djpeg
-COMOBJECTS= jutils.obj jerror.obj jmemmgr.obj jmemsys.obj
+COMOBJECTS= jutils.obj jerror.obj jmemmgr.obj jmemsys.obj jmemdosa.obj
 # compression objectfiles
 CLIBOBJECTS= jcmaster.obj jcdeflts.obj jcarith.obj jccolor.obj jcexpand.obj \
         jchuff.obj jcmcu.obj jcpipe.obj jcsample.obj jfwddct.obj \
-        jwrjfif.obj jrdgif.obj jrdppm.obj jrdrle.obj jrdtarga.obj
+        jwrjfif.obj jrdgif.obj jrdppm.obj jrdrle.obj jrdtarga.obj bitsource.o
 COBJECTS= jcmain.obj $(CLIBOBJECTS) $(COMOBJECTS)
 # decompression objectfiles
 DLIBOBJECTS= jdmaster.obj jddeflts.obj jbsmooth.obj jdarith.obj jdcolor.obj \
         jdhuff.obj jdmcu.obj jdpipe.obj jdsample.obj jquant1.obj \
         jquant2.obj jrevdct.obj jrdjfif.obj jwrgif.obj jwrppm.obj \
-        jwrrle.obj jwrtarga.obj
+        jwrrle.obj jwrtarga.obj bitsink.o
 DOBJECTS= jdmain.obj $(DLIBOBJECTS) $(COMOBJECTS)
-# These objectfiles are included in libjpeg.olb
+# These objectfiles are included in libjpeg.lib
 LIBOBJECTS= $(CLIBOBJECTS) $(DLIBOBJECTS) $(COMOBJECTS)
-# objectfile lists with commas --- what a crock
-COBJLIST= jcmain.obj,jcmaster.obj,jcdeflts.obj,jcarith.obj,jccolor.obj,\
-          jcexpand.obj,jchuff.obj,jcmcu.obj,jcpipe.obj,jcsample.obj,\
-          jfwddct.obj,jwrjfif.obj,jrdgif.obj,jrdppm.obj,jrdrle.obj,\
-          jrdtarga.obj,jutils.obj,jerror.obj,jmemmgr.obj,jmemsys.obj
-DOBJLIST= jdmain.obj,jdmaster.obj,jddeflts.obj,jbsmooth.obj,jdarith.obj,\
-          jdcolor.obj,jdhuff.obj,jdmcu.obj,jdpipe.obj,jdsample.obj,\
-          jquant1.obj,jquant2.obj,jrevdct.obj,jrdjfif.obj,jwrgif.obj,\
-          jwrppm.obj,jwrrle.obj,jwrtarga.obj,jutils.obj,jerror.obj,\
-          jmemmgr.obj,jmemsys.obj
-LIBOBJLIST= jcmaster.obj,jcdeflts.obj,jcarith.obj,jccolor.obj,jcexpand.obj,\
-          jchuff.obj,jcmcu.obj,jcpipe.obj,jcsample.obj,jfwddct.obj,\
-          jwrjfif.obj,jrdgif.obj,jrdppm.obj,jrdrle.obj,jrdtarga.obj,\
-          jdmaster.obj,jddeflts.obj,jbsmooth.obj,jdarith.obj,jdcolor.obj,\
-          jdhuff.obj,jdmcu.obj,jdpipe.obj,jdsample.obj,jquant1.obj,\
-          jquant2.obj,jrevdct.obj,jrdjfif.obj,jwrgif.obj,jwrppm.obj,\
-          jwrrle.obj,jwrtarga.obj,jutils.obj,jerror.obj,jmemmgr.obj,\
-          jmemsys.obj
 
 
-.first
-	@ Define Sys Sys$Library
+all: cjpeg.exe djpeg.exe
 
-# By default, libjpeg.olb is not built unless you explicitly request it.
-# You can add libjpeg.olb to the next line if you want it built by default.
-ALL : cjpeg.exe djpeg.exe
-	@ Continue
 
-cjpeg.exe : $(COBJECTS)
-	$(LINK) $(LFLAGS) /Executable = cjpeg.exe $(COBJLIST),$(OPT)/Option
-
-djpeg.exe : $(DOBJECTS)
-	$(LINK) $(LFLAGS) /Executable = djpeg.exe $(DOBJLIST),$(OPT)/Option
-
-# libjpeg.olb is useful if you are including the JPEG software in a larger
+# libjpeg.lib is useful if you are including the JPEG software in a larger
 # program; you'd include it in your link, rather than the individual modules.
-libjpeg.olb : $(LIBOBJECTS)
-	Library /Create libjpeg.olb $(LIBOBJLIST)
+libjpeg.lib: $(LIBOBJECTS) $(RFILE)
+    del libjpeg.lib
+    lib @$(RFILE) ;
 
-clean :
-	@- Set Protection = Owner:RWED *.*;-1
-	@- Set Protection = Owner:RWED *.OBJ
-	- Purge /NoLog /NoConfirm *.*
-	- Delete /NoLog /NoConfirm *.OBJ;
+# linker response file for same
+$(RFILE) : Makefile
+    del $(RFILE)
+    echo libjpeg.lib >$(RFILE)
+# silly want-to-create-it prompt:
+    echo y >>$(RFILE)
+    echo +jcmaster.obj +jcdeflts.obj +jcarith.obj +jccolor.obj & >>$(RFILE)
+    echo +jcexpand.obj +jchuff.obj +jcmcu.obj +jcpipe.obj & >>$(RFILE)
+    echo +jcsample.obj +jfwddct.obj +jwrjfif.obj +jrdgif.obj & >>$(RFILE)
+    echo +jrdppm.obj +jrdrle.obj +jrdtarga.obj +jdmaster.obj & >>$(RFILE)
+    echo +jddeflts.obj +jbsmooth.obj +jdarith.obj +jdcolor.obj & >>$(RFILE)
+    echo +jdhuff.obj +jdmcu.obj +jdpipe.obj +jdsample.obj & >>$(RFILE)
+    echo +jquant1.obj +jquant2.obj +jrevdct.obj +jrdjfif.obj & >>$(RFILE)
+    echo +jwrgif.obj +jwrppm.obj +jwrrle.obj +jwrtarga.obj & >>$(RFILE)
+    echo +jutils.obj +jerror.obj +jmemmgr.obj +jmemsys.obj & >>$(RFILE)
+    echo +jmemdosa.obj >>$(RFILE)
 
-test : cjpeg.exe djpeg.exe
-	mcr sys$disk:[]djpeg      testorig.jpg testout.ppm
-	mcr sys$disk:[]djpeg -gif testorig.jpg testout.gif
-	mcr sys$disk:[]cjpeg      testimg.ppm testout.jpg
-	- Backup /Compare/Log	  testimg.ppm testout.ppm
-	- Backup /Compare/Log	  testimg.gif testout.gif
-	- Backup /Compare/Log	  testimg.jpg testout.jpg
+cjpeg.exe: jcmain.obj libjpeg.lib
+    link /STACK:4096 /EXEPACK jcmain.obj, cjpeg.exe, , libjpeg.lib, ;
+
+djpeg.exe: jdmain.obj libjpeg.lib
+    link /STACK:4096 /EXEPACK jdmain.obj, djpeg.exe, , libjpeg.lib, ;
+
+jmemsys.c:
+	echo You must select a system-dependent jmemsys.c file.
+	echo Please read the SETUP directions.
+	exit 1
+
+clean:
+	del *.obj
+	del libjpeg.lib
+	del cjpeg.exe
+	del djpeg.exe
+	del testout.*
+
+test:
+        del testout.*
+        djpeg testorig.jpg testout.ppm
+        djpeg -gif testorig.jpg testout.gif
+        cjpeg testimg.ppm testout.jpg
+        fc testimg.ppm testout.ppm
+        fc testimg.gif testout.gif
+        fc testimg.jpg testout.jpg
 
 
+bitsink.o : bitsink.c bitsink.h
+bitsource.o : bitsource.c bitsource.h
 jbsmooth.obj : jbsmooth.c jinclude.h jconfig.h jpegdata.h
 jcarith.obj : jcarith.c jinclude.h jconfig.h jpegdata.h
 jccolor.obj : jccolor.c jinclude.h jconfig.h jpegdata.h
@@ -140,3 +160,5 @@ jwrppm.obj : jwrppm.c jinclude.h jconfig.h jpegdata.h
 jwrrle.obj : jwrrle.c jinclude.h jconfig.h jpegdata.h
 jwrtarga.obj : jwrtarga.c jinclude.h jconfig.h jpegdata.h
 jmemsys.obj : jmemsys.c jinclude.h jconfig.h jpegdata.h jmemsys.h
+jmemdosa.obj : jmemdosa.asm
+    masm /mx $*;

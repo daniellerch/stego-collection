@@ -8,8 +8,10 @@ $! and Tim Bell (tbell@netcom.com) for their help.
 $!
 $! Read SETUP instructions before running this!!
 $!
-$ DoCompile := CC /NoDebug /Optimize /Define = (TWO_FILE_COMMANDLINE,HAVE_STDC,INCLUDES_ARE_ANSI)
+$ DoCompile := CC /NoDebug /Optimize /Define = (TWO_FILE_COMMANDLINE,HAVE_STDC,INCLUDES_ARE_ANSI,STEG_SUPPORTED)
 $!
+$ DoCompile bitsource.c
+$ DoCompile bitsink.c
 $ DoCompile jcmain.c
 $ DoCompile jdmain.c
 $ DoCompile jcmaster.c
@@ -56,7 +58,7 @@ $ Library /Create libjpeg.olb  jcmaster.obj,jcdeflts.obj,jcarith.obj, -
           jdarith.obj,jdcolor.obj,jdhuff.obj,jdmcu.obj,jdpipe.obj, -
           jdsample.obj,jquant1.obj,jquant2.obj,jrevdct.obj,jrdjfif.obj, -
           jwrgif.obj,jwrppm.obj,jwrrle.obj,jwrtarga.obj,jutils.obj, -
-          jerror.obj,jmemmgr.obj,jmemsys.obj
+          jerror.obj,jmemmgr.obj,jmemsys.obj,bitsource.obj,bitsink.obj
 $!
 $ Link /Executable = cjpeg.exe  jcmain.obj,libjpeg.olb/Library,Sys$Disk:[]MAKVMS.OPT/Option
 $!

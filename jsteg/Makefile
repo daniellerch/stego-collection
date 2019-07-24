@@ -1,8 +1,7 @@
 # Makefile for Independent JPEG Group's software
 
-# This makefile is for Amiga systems using Manx Aztec C ver 5.x.
-# Use jmemname.c as the system-dependent memory manager.
-# Thanks to D.J. James (djjames@cup.portal.com) for this version.
+# This makefile is suitable for Unix-like systems with non-ANSI compilers.
+# If you have an ANSI compiler, makefile.ansi is a better starting point.
 
 # Read SETUP instructions before saying "make" !!
 
@@ -10,28 +9,33 @@
 CC= cc
 
 # You may need to adjust these cc options:
-# uncomment for generic 68000 code (will work on any Amiga)
-ARCHFLAGS= -sn
-
-# uncomment for 68020/68030 code (faster, but won't run on 68000 CPU)
-#ARCHFLAGS= -c2
-
-CFLAGS= -MC -MD -DAMIGA -DTWO_FILE_COMMANDLINE -DNEED_SIGNAL_CATCHER \
-	-Dsignal_catcher=_abort -DSHORTxSHORT_32 $(ARCHFLAGS) -spfam -r4
+CFLAGS= -O -DSTEG_SUPPORTED
+# In particular:
+#   Add -DBSD if on a pure BSD system (see jinclude.h).
+#   Add -DVMS if on a VMS system (see ansi2knr.c).
+#   Add -DMSDOS if on an MSDOS system (see ansi2knr.c).
+#   Add -DMEM_STATS to enable gathering of memory usage statistics.
+#   You may also want to add -DTWO_FILE_COMMANDLINE or -D switches for other
+#   symbols listed in jconfig.h, if you prefer not to change jconfig.h.
 
 # Link-time cc options:
-LDFLAGS= -g
+LDFLAGS= 
 
 # To link any special libraries, add the necessary -l commands here.
-LDLIBS= -lml -lcl
+# In particular, on some versions of HP-UX (and probably other SysV-derived
+# systems) there is a faster alternate malloc(3) library that you can use
+# by adding "-lmalloc" to this line.
+LDLIBS= 
 
 # miscellaneous OS-dependent stuff
 # linker
-LN= ln
+LN= $(CC)
 # file deletion command
-RM= delete quiet
-# library (.lib) file creation command
-AR= lb
+RM= rm -f
+# library (.a) file creation command
+AR= ar rc
+# second step in .a creation (use "touch" if not needed)
+AR2= ranlib
 
 
 # source files (independently compilable files)
@@ -62,33 +66,47 @@ COMOBJECTS= jutils.o jerror.o jmemmgr.o jmemsys.o
 # compression objectfiles
 CLIBOBJECTS= jcmaster.o jcdeflts.o jcarith.o jccolor.o jcexpand.o jchuff.o \
         jcmcu.o jcpipe.o jcsample.o jfwddct.o jwrjfif.o jrdgif.o jrdppm.o \
-        jrdrle.o jrdtarga.o
+        jrdrle.o jrdtarga.o bitsource.o
 COBJECTS= jcmain.o $(CLIBOBJECTS) $(COMOBJECTS)
 # decompression objectfiles
 DLIBOBJECTS= jdmaster.o jddeflts.o jbsmooth.o jdarith.o jdcolor.o jdhuff.o \
         jdmcu.o jdpipe.o jdsample.o jquant1.o jquant2.o jrevdct.o jrdjfif.o \
-        jwrgif.o jwrppm.o jwrrle.o jwrtarga.o
+        jwrgif.o jwrppm.o jwrrle.o jwrtarga.o bitsink.o
 DOBJECTS= jdmain.o $(DLIBOBJECTS) $(COMOBJECTS)
-# These objectfiles are included in libjpeg.lib
+# These objectfiles are included in libjpeg.a
 LIBOBJECTS= $(CLIBOBJECTS) $(DLIBOBJECTS) $(COMOBJECTS)
 
 
-all: cjpeg djpeg
-# By default, libjpeg.lib is not built unless you explicitly request it.
-# You can add libjpeg.lib to the line above if you want it built by default.
+all: ansi2knr cjpeg djpeg
+# By default, libjpeg.a is not built unless you explicitly request it.
+# You can add libjpeg.a to the line above if you want it built by default.
 
 
-cjpeg: $(COBJECTS)
+# This rule causes ansi2knr to be invoked.  If you use this makefile,
+# make sure PROTO is not defined by jconfig.h.
+
+.c.o:
+	./ansi2knr $*.c tmpansi.c
+	$(CC) $(CFLAGS) -c tmpansi.c
+	mv tmpansi.o $*.o
+	$(RM) tmpansi.c
+
+ansi2knr: ansi2knr.c
+	$(CC) $(CFLAGS) -o ansi2knr ansi2knr.c
+
+
+cjpeg: ansi2knr $(COBJECTS)
 	$(LN) $(LDFLAGS) -o cjpeg $(COBJECTS) $(LDLIBS)
 
-djpeg: $(DOBJECTS)
+djpeg: ansi2knr $(DOBJECTS)
 	$(LN) $(LDFLAGS) -o djpeg $(DOBJECTS) $(LDLIBS)
 
-# libjpeg.lib is useful if you are including the JPEG software in a larger
+# libjpeg.a is useful if you are including the JPEG software in a larger
 # program; you'd include it in your link, rather than the individual modules.
-libjpeg.lib: $(LIBOBJECTS)
-	-$(RM) libjpeg.lib
-	$(AR) libjpeg.lib  $(LIBOBJECTS)
+libjpeg.a: ansi2knr $(LIBOBJECTS)
+	$(RM) libjpeg.a
+	$(AR) libjpeg.a  $(LIBOBJECTS)
+	$(AR2) libjpeg.a
 
 jmemsys.c:
 	echo You must select a system-dependent jmemsys.c file.
@@ -96,23 +114,25 @@ jmemsys.c:
 	exit 1
 
 clean:
-	-$(RM) *.o cjpeg djpeg libjpeg.lib core testout.*
+	$(RM) *.o cjpeg djpeg libjpeg.a ansi2knr core tmpansi.* testout.*
 
 distribute:
-	-$(RM) jpegsrc.tar*
+	$(RM) jpegsrc.tar*
 	tar cvf jpegsrc.tar $(DISTFILES)
 	compress -v jpegsrc.tar
 
 test: cjpeg djpeg
-	-$(RM) testout.ppm testout.gif testout.jpg
-	djpeg testorig.jpg testout.ppm
-	djpeg -gif testorig.jpg testout.gif
-	cjpeg testimg.ppm testout.jpg
+	$(RM) testout.ppm testout.gif testout.jpg
+	./djpeg testorig.jpg >testout.ppm
+	./djpeg -gif testorig.jpg >testout.gif
+	./cjpeg testimg.ppm >testout.jpg
 	cmp testimg.ppm testout.ppm
 	cmp testimg.gif testout.gif
 	cmp testimg.jpg testout.jpg
 
 
+bitsink.o : bitsink.c bitsink.h
+bitsource.o : bitsource.c bitsource.h
 jbsmooth.o : jbsmooth.c jinclude.h jconfig.h jpegdata.h 
 jcarith.o : jcarith.c jinclude.h jconfig.h jpegdata.h 
 jccolor.o : jccolor.c jinclude.h jconfig.h jpegdata.h 

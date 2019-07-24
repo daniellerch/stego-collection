@@ -1,0 +1,112 @@
+This version of the Independent JPEG Group's JPEG Software (release 4)
+has been modifed for 1-bit steganography in JFIF output files.
+
+
+To compile the package, simply follows the steps given in the original
+README file.
+
+To inject a data file into a JPEG/JFIF image, simply add the option
+"-steg filename" to the "cjpeg" command line.  If the data file is too
+large for the image, "cjpeg" will inform you.  At this point, you can
+compress the data file, increase the quality of the image (thereby
+increasing image size), or try a different image.
+
+Extraction of a data file works similarly.  The "-steg filename"
+option to "djpeg" writes the steganographic data to the file, wiping
+out its previous contents.  Usually, the decoded image sent to
+standard output is redirected to "/dev/null".
+
+
+Steganography is the science of hiding data in otherwise plain text or
+images.  Here, we are hiding the data inside images stored in the JFIF
+format of the JPEG standard.  It was believed that this type of
+steganography was impossible, or at least infeasible, since the JPEG
+standard uses lossy encoding to compress its data.  Any hidden data
+would be overwhelmed by the noise.  The trick used by this
+steganographic implementation is to recognize that JPEG encoding is
+split into lossy and non-lossy stages.  The lossy stages use a
+discrete cosine transform and a quantization step to compress the
+image data; the non-lossy stage then uses Huffmann coding to further
+compress the image data.  As such, we can insert the steganographic
+data into the image data between those two steps and not risk
+corruption.
+
+This method has several benefits.  First, the JPEG/JFIF image format
+has become the de-facto standard for transmission across USENET and
+for storage on FTP sites.  Steganography using these formats would be
+innocuous compared to that with most other formats.  Second,
+steganographic data in JPEG images is harder to detect with the naked
+eye than the same data in raw 8-bit or 24-bit images.  Just as the
+aforementioned lossy raw->encoded conversion tends to wipe out
+steganographic data, the reversed, encoded->raw conversion tends to do
+the same thing.  The steganographic inaccuracies in the image are
+wiped over.  In addition, the wide control available over image
+quantization makes it very difficult to establish whether or not the
+inaccuracies which do appear are caused by steganographic data or by
+lower-quality quantization.
+
+The JPEG encoding procedure divides an image into 8x8 blocks of pixels
+in the YCbCr colorspace.  Then they are run through a discrete cosine
+transform (DCT) and the resulting frequency coefficients are scaled to
+remove the ones which a human viewer would not detect under normal
+conditions.  If steganographic data is being loaded into the JPEG
+image, the loading occurs after this step.  The lowest-order bits of
+all non-zero frequency coefficients are replaced with successive bits
+from the steganographic source file, and these modified coefficients
+are sent to the Huffmann coder.  (This choice of encoding slots produces
+good results, but there may be better ones.  For example, tests have
+shown that the human eye is less sensitive to changes along the Cb and
+Cr colorspace axes---we ought to be able to stick more data there.)
+
+The steganographic encoding format (the format of data inserted into
+the lowest-order bits of the image) is as follows:
+
+  +-----+-----------     -----+--------------------------------
+  |  A  |  B  B  B  . . .  B  |  C  C  C  C  C  C  C  C  C  C  . . .
+  +-----+-----------     -----+--------------------------------
+
+  "A" is five bits.  It expresses the length (in bits) of field B.
+  Order is most-significant-bit first.
+
+  "B" is some number of bits from zero to thirty-one.  It expresses
+  the length (in bytes) of the injection file.  Order is again
+  most-significant-bit first.  The range of values for "B" is 0 to
+  one billion.
+
+  "C" is the bits in the injection file.  No ordering is implicit on
+  the bit stream.
+
+This format is designed to make the steganographic data as innocuous
+as possible.  (As one would expect, there is no magic cookie at the
+front giving the format).  We are forced to have a length field at the
+beginning of the data, since any sort of in-band EOF tag would be
+infeasible.
+
+Expressing the length field as a raw series of bits representing an
+integer would be dangerous, however; for any sort of small
+steganographic file, there would be a long string of zeroes in the
+field---very easy to detect.  By stripping off the zeroes and creating
+a secondary length field for our primary length field(!), we greatly
+reduce the problem.  The five bits for the secondary length field is
+small enough that runs of zeroes are not a problem, and it allows a
+primary length field of up to thirty-one bits.
+
+There is still a danger in that the sixth bit of the stream will
+always be one; this is solved by tacking an extra zero onto the
+beginning of the primary length field in half the cases.  This helps
+randomize the output, although it reduces the representable data size
+to one gigabyte.
+
+The storage effectiveness for this steganographic technique is
+reasonable, but not astounding.  Using the simple encoding criteria
+described above, an N kilobyte data file fits when the resulting
+JPEG/JFIF file is around C*N kilobytes, where C ranges from eight to
+ten.  This is not much worse than raw 24-bit insertion, and the
+possibility of tweaking with regards to colorspace could produce even
+better results.  Compressing the steganographic file before injection
+does not seem to greatly harm compression in the envelope image; the
+data spreading that occurs during injection increases entropy enough
+for Huffmann coding to work.
+
+Derek Upham
+upham@cs.ubc.ca

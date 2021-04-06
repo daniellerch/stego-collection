@@ -1,11 +1,11 @@
 # stego-collection
-Collection of stegoanography software. Mostly outdated and insecure.
+Collection of image stegoanography software. Mostly outdated and insecure.
 
-- [Jsteg](jsteg) 
-- [Hide and Seek](jphs) 
 - [F5](F5) 
+- [Hide and Seek](jphs) 
+- [Jsteg](jsteg) 
 - [OutGuess](outguess) 
-- [StegoSuite](stegosuite) 
 - [StegHide](steghide-0.5.1) 
+- [StegoSuite](stegosuite) 
 
 

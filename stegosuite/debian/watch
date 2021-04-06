@@ -1,0 +1,3 @@
+version=3
+opts=filenamemangle=s/.*\.tar\.gz\?ref=v?(\d\S*)/Stegosuite-$1\.tar\.gz/g \
+  https://dev.stegosuite.org/Stegosuite/Stegosuite/tags .*archive\.tar\.gz\?ref=v?(\d\S*)

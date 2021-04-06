@@ -1,0 +1,38 @@
+Source: stegosuite
+Section: graphics
+Priority: optional
+Maintainer: Debian Java Maintainers <pkg-java-maintainers@lists.alioth.debian.org>
+Uploaders:
+ Tobias Ilte <tobias@stegosuite.org>
+Build-Depends:
+ debhelper (>= 11),
+ default-jdk,
+ liblogback-java,
+ libmaven-compiler-plugin-java,
+ libmaven-jar-plugin-java,
+ libslf4j-java,
+ libswt-gtk-4-java,
+ libcommons-cli-java,
+ maven-debian-helper (>= 1.5)
+Standards-Version: 4.3.0
+Vcs-Git: https://salsa.debian.org/java-team/stegosuite.git
+Vcs-Browser: https://salsa.debian.org/java-team/stegosuite
+Homepage: https://dev.stegosuite.org/stegosuite/stegosuite
+
+Package: stegosuite
+Architecture: all
+Depends:
+ default-jre | java8-runtime,
+ libswt-cairo-gtk-4-jni,
+ libswt-gtk-4-jni,
+ libcommons-cli-java,
+ ${maven:Depends},
+ ${misc:Depends}
+Suggests:
+ ${maven:OptionalDepends}
+Description: steganography tool to hide information in image files
+ Stegosuite is a graphical steganography tool to easily hide information in
+ image files. It allows the embedding of text messages and multiple files of any
+ type. In addition, the embedded data is encrypted using AES.
+ Currently supported file types are BMP, GIF, JPG and PNG.
+ Stegosuite is written in Java and utilizes the SWT toolkit for its interface.

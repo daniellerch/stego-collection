@@ -1,0 +1,2 @@
+
+org.stegosuite stegosuite jar s/.*/debian/ * *

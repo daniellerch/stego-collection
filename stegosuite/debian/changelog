@@ -1,0 +1,44 @@
+stegosuite (0.8.0-2) unstable; urgency=medium
+
+  * Team upload.
+
+  [ Tobias Ilte ]
+  * Fix typo in man page
+
+  [ tony mancill ]
+  * Update runtime dependency from libswt-gtk2-4-jni to libswt-gtk-4-jni
+    (Closes: #917576)   
+  * Update Vcs- fields in debian/control for Salsa
+  * Drop get-orig-source target from debian/rules
+  * Use debhelper 11
+  * Bump Standards-Version to 4.3.0
+
+ -- tony mancill <tmancill@debian.org>  Wed, 02 Jan 2019 20:42:14 -0800
+
+stegosuite (0.8.0-1) unstable; urgency=medium
+
+  * New upstream release
+  * deal with stegosuite.appdata.xml in stegosuite.install
+  * add png to mime type in desktop file
+  * ignore junit instead of testng
+  * update file location in copyright
+  * add libcommons-cli-java to dependencies
+  * update patches 
+  * update manpage
+
+ -- Tobias Ilte <tobias@stegosuite.org>  Fri, 13 Oct 2017 19:40:18 +0200
+
+stegosuite (0.7.3-2) unstable; urgency=medium
+
+  * Team upload.
+  * Switch to compat level 10.
+  * debian/control: Change Section from Java to Graphics.
+    Thanks to Axel Beckert for the report. (Closes: #829258)
+
+ -- Markus Koschany <apo@debian.org>  Fri, 07 Oct 2016 20:30:01 +0200
+
+stegosuite (0.7.3-1) unstable; urgency=medium
+
+  * Initial release (Closes: #825238)
+
+ -- Tobias Ilte <tobias@stegosuite.org>  Sun, 12 Jun 2016 14:40:18 +0200

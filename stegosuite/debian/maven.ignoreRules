@@ -1,0 +1,4 @@
+
+org.apache.maven.plugins maven-assembly-plugin * * * *
+org.codehaus.mojo exec-maven-plugin * * * *
+junit junit * * * *

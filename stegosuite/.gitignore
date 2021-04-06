@@ -1,0 +1,23 @@
+/bin/
+/target/
+.settings/
+.classpath
+.project
+.project.swp
+.pmd
+
+## Exclude latex auxiliary files
+*.aux
+*.toc
+*.out
+*.log
+*.lof
+*.ind
+*.ilg
+*.idx
+*.fls
+*.synctex.gz
+
+## Exclude files from IDEA
+.idea/
+stegosuite.iml

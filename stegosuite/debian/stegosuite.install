@@ -1,0 +1,4 @@
+misc/stegosuite.appdata.xml /usr/share/metainfo/
+debian/stegosuite.desktop usr/share/applications/
+src/deb/data/stegosuite usr/bin/
+src/deb/data/stegosuite.png usr/share/icons/hicolor/256x256/apps

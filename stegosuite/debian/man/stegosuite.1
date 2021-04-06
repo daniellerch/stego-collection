@@ -1,0 +1,60 @@
+.TH stegosuite 1 "13 October 2017" "version 0.8.0" "Stegosuite(1) Man Pages"
+.SH NAME
+stegosuite \- Steganography tool to hide information in image files
+.SH SYNOPSIS
+.B stegosuite
+\fB\-c\fR
+[\fB\-\-disable\-noise\-detection]
+.IR imagefile
+.br
+.B stegosuite
+\fB\-e\fR
+[\fB\-m \fImessage\fR]
+[\fB\-f \fIfile\fR [...]]
+[\fB\-k \fIkey\fR]
+[\fB\-\-disable\-noise\-detection]
+.IR imagefile
+.br
+.B stegosuite
+\fB\-x\fR
+[\fB\-m \fImessage\fR]
+[\fB\-f \fIfile\fR [...]]
+[\fB\-k \fIkey\fR]
+[\fB\-\-disable\-noise\-detection]
+.IR imagefile
+
+.SH DESCRIPTION
+.PP
+Stegosuite is a graphical steganography tool to easily hide information in
+image files. It allows the embedding of text messages and multiple files of any
+type. In addition, the embedded data is encrypted using AES. Currently
+supported file types are BMP, GIF, JPG and PNG.
+.TP
+\fB\-c\fR,\-\-capacity
+shows the maximum amount of data which can
+be embededded
+.TP
+\fB\-e\fR,\-\-embed
+embed data into image
+.TP
+\fB\-x\fR,\-\-extract
+extract data from image
+.TP
+\fB\-f \fIfile\fR [...],\-\-files \fIfile\fR [...]
+files to embed
+.TP
+\fB\-m \fImessage\fR,\-\-message \fImessage\fR
+message to embed
+.TP
+\fB\-k \fIsecret_key\fR,\-\-key \fIsecret_key\fR
+secret key used for encryption and hiding
+.TP
+\fB\-\-disable\-noise\-detection\fR
+disables the automatic avoidance of
+homogeneous areas
+.TP
+\fB\-h\fR,\-\-help
+displays a help message
+.TP
+\fB\-d\fR,\-\-debug
+show debug information

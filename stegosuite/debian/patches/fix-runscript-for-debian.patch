@@ -1,0 +1,18 @@
+added gtk2 fallback for certain configurations
+--- a/src/deb/data/stegosuite
++++ b/src/deb/data/stegosuite
+@@ -10,4 +10,13 @@
+ 
+ STEGOSUITE_CLASSPATH="$STEGOSUITEJAR"
+ 
+-java -jar $STEGOSUITE_CLASSPATH $@
++gtk3_version=`dpkg -s libgtk-3-0|grep '^Version' |  cut -d'.' -f2`
++swt4_version=`dpkg -s libswt-gtk-4-java|grep '^Version' |  cut -d'.' -f2`
++
++# Run with GTK2-fallback if swt<=4.8 and gtk>=3.22
++if [ \( "$gtk3_version" -ge 22 \) -a \( "$swt4_version" -le 8 \) ]; then
++    env SWT_GTK3=0 java -jar $STEGOSUITE_CLASSPATH $@
++else
++    java -jar $STEGOSUITE_CLASSPATH $@
++fi
++

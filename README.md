@@ -1,5 +1,5 @@
 # stego-collection
-Collection of image stegoanography software. Mostly outdated and insecure.
+Collection of old image steganography software. Mostly outdated and insecure.
 
 - [F5](F5) 
 - [Hide and Seek](jphs) 

@@ -205,7 +205,7 @@ static int jpseek (const char* infilename,
   return (1);
  }	
 
- if ((f = open(seekfilename,O_WRONLY|O_TRUNC|O_CREAT)) < 0) {
+ if ((f = open(seekfilename,O_WRONLY|O_TRUNC|O_CREAT, 0644)) < 0) {
   perror("Can't open seek file");
   return (1);
  }

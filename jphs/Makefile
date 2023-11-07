@@ -12,7 +12,7 @@ BE_CFLAGS = -DBF_BE
 LE_CFLAGS = -DBF_LE
 
 JP_CFLAGS = $(CFLAGS_COMMON) \
-	    -I./jpeg-8a
+	    -I./jpeg-8a 
 BF_CFLAGS = $(CFLAGS_COMMON)
 
 LIBS = -ljpeg
@@ -31,8 +31,8 @@ BINDIR = $(PREFIX)/bin
 # targets
 TARGETS = jphide jpseek
 all: $(TARGETS)
-jphide: $(HDOBJECTS)
-jpseek: $(SKOBJECTS)
+jphide: $(HDOBJECTS) $(LIBS)
+jpseek: $(SKOBJECTS) $(LIBS)
 
 # object rules
 bf.o:			CFLAGS=$(BF_CFLAGS)
